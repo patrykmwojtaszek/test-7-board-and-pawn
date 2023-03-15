@@ -23,7 +23,7 @@ public class PawnController {
     @PutMapping
     public ResponseEntity<PawnDto> movePawnOnTheBoard(@RequestBody @Valid UpdatePawnCommand updatePawnCommand) {
         Pawn pawn = pawnService.movePawn(updatePawnCommand.getDirection());
-        pawnService.sendMailWithAttachment("patryk.wojtaszek@gmail.com", pawn);
+        pawnService.sendMailWithAttachment(updatePawnCommand.getMailAddress(), pawn);
         PawnDto pawnDto = modelMapper.map(pawn, PawnDto.class);
         return ResponseEntity.ok(pawnDto);
     }
