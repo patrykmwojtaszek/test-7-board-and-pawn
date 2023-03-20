@@ -6,45 +6,79 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+import pl.kurs.test7boardandpawn.exceptions.model.MailFailedDeliveryException;
 import pl.kurs.test7boardandpawn.service.MailService;
+import pl.kurs.test7boardandpawn.service.MailTimerTask;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
+import javax.transaction.Transactional;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.Timer;
 
 @Service
 @RequiredArgsConstructor
 public class MailServiceImpl implements MailService {
 
+    private final ImageServiceImpl imageService;
     private final JavaMailSender javaMailSender;
+    private final MailTimerTask mailTimerTask;
 
-//    @Override
-//    public void sendMail(String mailAddressTo, int x, int y) {
-//        SimpleMailMessage message = new SimpleMailMessage();
-//        message.setTo(mailAddressTo);
-//        message.setSubject("Board And Pawn");
-//        message.setText("Position of the pawn is x: " + x + " y: " + y);
-//        javaMailSender.send(message);
-//    }
 
     @Override
-    public void sendMailWithAttachment(String mailAddressTo, int x, int y, File file) throws MessagingException {
+    @Transactional
+    public void startMailTimerTask(String mailAddressTo) {
+
+        mailTimerTask.setImageService(imageService);
+        mailTimerTask.setMailService(this);
+        mailTimerTask.setMailAddress(mailAddressTo);
+
+        mailTimerTask.run();
+
+        Timer timer = new Timer();
+        timer.scheduleAtFixedRate(mailTimerTask, getToday23h59m(), 1000*60*60*24);
+
+    }
+
+    private static Date getToday23h59m(){
+        Calendar today = new GregorianCalendar();
+        Calendar result = new GregorianCalendar(
+                today.get(Calendar.YEAR),
+                today.get(Calendar.MONTH),
+                today.get(Calendar.DATE),
+                23,
+                50
+        );
+        return result.getTime();
+    }
+
+
+
+    @Override
+    public void sendMailWithAttachment(String mailAddressTo, File file)  {
         MimeMessage message = javaMailSender.createMimeMessage();
 
-        MimeMessageHelper helper = new MimeMessageHelper(message, true);
+        try {
+            MimeMessageHelper helper = new MimeMessageHelper(message, true);
+            helper.setFrom("jk3539727@gmail.com");
+            helper.setTo(mailAddressTo);
+            helper.setSubject("Board And Pawn");
+            helper.setText("");
+            helper.addAttachment("GIF", file);
+        } catch (MessagingException e) {
+            e.printStackTrace();
+        }
 
-        helper.setFrom("jk3539727@gmail.com");
-        helper.setTo(mailAddressTo);
-        helper.setSubject("Board And Pawn");
-        helper.setText("Position of the pawn is x: " + x + " y: " + y);
-
-//        FileSystemResource file
-//                = new FileSystemResource(new File(pathToAttachment));
-        helper.addAttachment("GIF", file);
-
-        javaMailSender.send(message);
+        try {
+            javaMailSender.send(message);
+        } catch (MailFailedDeliveryException e) {
+            e.printStackTrace();
+        }
     }
 }

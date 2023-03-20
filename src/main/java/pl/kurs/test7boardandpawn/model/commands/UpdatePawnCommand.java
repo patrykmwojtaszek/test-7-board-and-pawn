@@ -20,7 +20,7 @@ public class UpdatePawnCommand {
     @Direction
     private String direction;
 
-    @NotEmpty
-    @Email
-    private String mailAddress;
+//    @NotEmpty
+//    @Email
+//    private String mailAddress;
 }

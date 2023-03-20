@@ -1,30 +1,30 @@
 package pl.kurs.test7boardandpawn.service.impl;
 
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import pl.kurs.test7boardandpawn.exceptions.model.InvalidDirectionException;
 import pl.kurs.test7boardandpawn.exceptions.model.InvalidPositionException;
 import pl.kurs.test7boardandpawn.model.Board;
 import pl.kurs.test7boardandpawn.model.Direction;
 import pl.kurs.test7boardandpawn.model.Pawn;
-import pl.kurs.test7boardandpawn.model.dto.PawnDto;
 import pl.kurs.test7boardandpawn.service.MailService;
+import pl.kurs.test7boardandpawn.service.MailTimerTask;
 import pl.kurs.test7boardandpawn.service.PawnService;
 
-import javax.imageio.ImageIO;
-import javax.mail.MessagingException;
 import javax.transaction.Transactional;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
+
+import java.util.Date;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import java.util.Timer;
 
 @Service
 @RequiredArgsConstructor
+@Getter
 public class PawnServiceImpl implements PawnService {
 
     private final Pawn pawn = new Pawn(0,0);
     private final Board board = new Board(5, 5, pawn);
-    private final MailService mailService;
     private final ImageServiceImpl imageService;
 
     @Override
@@ -35,10 +35,14 @@ public class PawnServiceImpl implements PawnService {
     @Override
     @Transactional
     public Pawn movePawn(String direction) {
+        if (pawn.getPositionX() == 0 & pawn.getPositionY() == 0) imageService.doScreenshot(board,pawn);
+
         if (direction.equals(Direction.UP.toString())) movePawnUp(pawn);
         if (direction.equals(Direction.DOWN.toString())) movePawnDown(pawn);
         if (direction.equals(Direction.LEFT.toString())) movePawnLeft(pawn);
         if (direction.equals(Direction.RIGHT.toString())) movePawnRight(pawn);
+
+        imageService.doScreenshot(board, pawn);
         return pawn;
     }
 
@@ -68,23 +72,5 @@ public class PawnServiceImpl implements PawnService {
             throw new InvalidPositionException("Invalid Position");
         }
         pawn.setPositionX(pawn.getPositionX() + 1);
-    }
-
-//    @Override
-//    public void sendMail(String mailAddressTo, Pawn pawn) {
-//        mailService.sendMail(mailAddressTo, pawn.getPositionX(), pawn.getPositionY());
-//    }
-
-    @Override
-    public void sendMailWithAttachment(String mailAddressTo, Pawn pawn) {
-
-        BufferedImage bufferedImage = imageService.createImageWithText(board, pawn);
-        try {
-            File outfile = new File("image.jpg");
-            ImageIO.write(bufferedImage, "jpg", outfile);
-            mailService.sendMailWithAttachment(mailAddressTo, pawn.getPositionX(), pawn.getPositionY(), outfile);
-        } catch (MessagingException | IOException e) {
-            e.getMessage();
-        }
     }
 }

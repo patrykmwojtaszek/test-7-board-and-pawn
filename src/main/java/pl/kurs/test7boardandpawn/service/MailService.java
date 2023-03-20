@@ -7,7 +7,7 @@ import java.math.BigDecimal;
 
 public interface MailService {
 
-//    void sendMail(String mailAddressTo, int x, int y);
-    void sendMailWithAttachment(String mailAddressTo, int x, int y, File file) throws MessagingException;
+    void sendMailWithAttachment(String mailAddressTo, File file);
+    void startMailTimerTask(String mailAddressTo);
 
 }

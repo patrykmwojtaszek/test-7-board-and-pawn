@@ -5,9 +5,13 @@ import pl.kurs.test7boardandpawn.model.Pawn;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.io.File;
 
 public interface ImageService {
 
-    BufferedImage createImageWithText(Board board, Pawn pawn);
+    void doScreenshot(Board board, Pawn pawn);
+    BufferedImage getBufferedImage(Board board, Pawn pawn);
+//    File getGifFile(Board board, Pawn pawn);
+    File getGifFile();
 
 }

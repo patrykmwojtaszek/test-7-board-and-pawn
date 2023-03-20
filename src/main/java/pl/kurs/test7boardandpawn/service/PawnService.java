@@ -8,7 +8,5 @@ public interface PawnService {
 
     Pawn getPawn();
     Pawn movePawn(String direction);
-//    void sendMail(String mailAddressTo, Pawn pawn);
-    void sendMailWithAttachment(String mailAddressTo, Pawn pawn);
 
 }
