@@ -33,14 +33,15 @@ public class PawnServiceImpl implements PawnService {
     }
 
     @Override
-    @Transactional
-    public Pawn movePawn(String direction) {
+    public synchronized Pawn movePawn(String direction) {
         if (pawn.getPositionX() == 0 & pawn.getPositionY() == 0) imageService.doScreenshot(board,pawn);
 
-        if (direction.equals(Direction.UP.toString())) movePawnUp(pawn);
-        if (direction.equals(Direction.DOWN.toString())) movePawnDown(pawn);
-        if (direction.equals(Direction.LEFT.toString())) movePawnLeft(pawn);
-        if (direction.equals(Direction.RIGHT.toString())) movePawnRight(pawn);
+        switch (direction) {
+            case "UP" -> movePawnUp(pawn);
+            case "DOWN" -> movePawnDown(pawn);
+            case "LEFT" -> movePawnLeft(pawn);
+            case "RIGHT" -> movePawnRight(pawn);
+        }
 
         imageService.doScreenshot(board, pawn);
         return pawn;

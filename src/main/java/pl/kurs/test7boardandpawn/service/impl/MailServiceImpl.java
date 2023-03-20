@@ -32,7 +32,6 @@ public class MailServiceImpl implements MailService {
 
 
     @Override
-    @Transactional
     public void startMailTimerTask(String mailAddressTo) {
 
         mailTimerTask.setImageService(imageService);
